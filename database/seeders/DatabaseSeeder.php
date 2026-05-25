@@ -2,24 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Спочатку створюємо користувачів (авторів)
+        $this->call(UsersTableSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 2. Потім створюємо категорії
+        $this->call(BlogCategoriesTableSeeder::class);
+
+        // 3. І наприкінці генеруємо 100 статей за допомогою фабрики
+        \App\Models\BlogPost::factory(100)->create();
     }
 }
