@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Api\Blog;
+use App\Http\Resources\Api\Blog\PostCollection;
 
-use App\Http\Controllers\Api\Blog\Admin\BaseController;
 use App\Models\BlogPost;
+use App\Http\Resources\Api\Blog\PostResource;
 use Illuminate\Http\Request;
 
 class PostController extends BaseController
@@ -13,9 +14,9 @@ class PostController extends BaseController
      */
     public function index()
     {
-        $items = BlogPost::all();
+        $items = BlogPost::with(['category', 'user'])->get();
 
-        return $items;
+        return new PostCollection($items);
     }
 
     /**
