@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Api\Blog;
-use App\Http\Resources\Api\Blog\PostCollection;
 
 use App\Models\BlogPost;
 use App\Http\Resources\Api\Blog\PostResource;
+use App\Http\Resources\Api\Blog\PostCollection;
+use App\Http\Requests\Api\Blog\PostCreateRequest;
+use App\Http\Requests\Api\Blog\PostUpdateRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends BaseController
 {
@@ -22,9 +25,21 @@ class PostController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PostCreateRequest $request)
     {
-        //
+        $data = $request->all();
+
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['title']);
+        }
+
+        $data['user_id'] = 1;
+
+        $item = BlogPost::create($data);
+
+        if ($item) {
+            return new PostResource($item);
+        }
     }
 
     /**
@@ -32,15 +47,29 @@ class PostController extends BaseController
      */
     public function show(string $id)
     {
-        //
+        $item = BlogPost::with(['category', 'user'])->findOrFail($id);
+
+        return new PostResource($item);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(PostUpdateRequest $request, string $id)
     {
-        //
+        $item = BlogPost::findOrFail($id);
+
+        $data = $request->all();
+
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['title']);
+        }
+
+        $result = $item->update($data);
+
+        if ($result) {
+            return new PostResource($item);
+        }
     }
 
     /**
@@ -48,6 +77,12 @@ class PostController extends BaseController
      */
     public function destroy(string $id)
     {
-        //
+        $item = BlogPost::findOrFail($id);
+
+        $result = $item->delete();
+
+        if ($result) {
+            return ['success' => true];
+        }
     }
 }
