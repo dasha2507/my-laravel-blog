@@ -36,4 +36,5 @@ class CategoryCreateRequest extends FormRequest
             'parent_id.exists'  => 'Обрана батьківська категорія не існує',
         ];
     }
+
 }
