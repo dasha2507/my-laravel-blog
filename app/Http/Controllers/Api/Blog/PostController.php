@@ -58,20 +58,24 @@ class PostController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(PostUpdateRequest $request, string $id)
+    public function update(BlogPostUpdateRequest $request, $id)
     {
-        $item = BlogPost::findOrFail($id);
-
-        $data = $request->all();
-
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
+        $item = $this->blogPostRepository->getEdit($id);
+        if (empty($item)) { //якщо ід не знайдено
+            return ['message' => "Запис id=[{$id}] не знайдено"];
         }
 
-        $result = $item->update($data);
+        $data = $request->all(); //отримаємо масив даних, які надійшли з форми
+
+        $result = $item->update($data); //оновлюємо дані об'єкта і зберігаємо в БД
 
         if ($result) {
-            return new PostResource($item);
+            return [
+                'success' => true,
+                'message' => 'Успішно збережено'
+            ];
+        } else {
+            return ['message' => 'Помилка збереження'];
         }
     }
 
