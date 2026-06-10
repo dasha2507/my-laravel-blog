@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Api\Blog;
 
 use App\Models\BlogPost;
 use App\Http\Resources\Api\Blog\PostResource;
-use App\Http\Resources\Api\Blog\PostCollection;
+use App\Http\Resources\PostCollection;
 use App\Http\Requests\Api\Blog\PostCreateRequest;
 use App\Http\Requests\Api\Blog\PostUpdateRequest;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
+use App\Jobs\BlogPostAfterCreateJob;
+use App\Jobs\BlogPostAfterDeleteJob;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use DispatchesJobs;
 
 class PostController extends BaseController
 {
@@ -28,17 +32,18 @@ class PostController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(BlogPostCreateRequest $request)
+    public function store(\Illuminate\Http\Request $request)
     {
         $data = $request->input(); // отримуємо масив даних, які надійшли з форми
 
         $item = (new BlogPost())->create($data); // створюємо об'єкт і додаємо в БД
 
         if ($item) {
+            BlogPostAfterCreateJob::dispatch($item);
+
             return ['success' => true, 'message' => 'Успішно збережено'];
-        } else {
-            return ['msg' => 'Помилка збереження'];
         }
+
     }
 
     /**
@@ -87,9 +92,9 @@ class PostController extends BaseController
         // $result = BlogPost::find($id)->forceDelete();
 
         if ($result) {
+            BlogPostAfterDeleteJob::dispatch($id)->delay(20);
+
             return ['success' => true, 'message' => "Запис [{$id}] успішно видалено"];
-        } else {
-            return ['msg' => 'Помилка видалення запису'];
         }
     }
 }
