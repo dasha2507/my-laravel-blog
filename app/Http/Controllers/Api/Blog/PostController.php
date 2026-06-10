@@ -28,20 +28,16 @@ class PostController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PostCreateRequest $request)
+    public function store(BlogPostCreateRequest $request)
     {
-        $data = $request->all();
+        $data = $request->input(); // отримуємо масив даних, які надійшли з форми
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
-        $data['user_id'] = 1;
-
-        $item = BlogPost::create($data);
+        $item = (new BlogPost())->create($data); // створюємо об'єкт і додаємо в БД
 
         if ($item) {
-            return new PostResource($item);
+            return ['success' => true, 'message' => 'Успішно збережено'];
+        } else {
+            return ['msg' => 'Помилка збереження'];
         }
     }
 
@@ -82,14 +78,18 @@ class PostController extends BaseController
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $item = BlogPost::findOrFail($id);
+        // Софт-деліт: запис міняє статус, але фізично залишається в БД
+        $result = BlogPost::destroy($id);
 
-        $result = $item->delete();
+        // Альтернатива (якщо треба видалити назовсім):
+        // $result = BlogPost::find($id)->forceDelete();
 
         if ($result) {
-            return ['success' => true];
+            return ['success' => true, 'message' => "Запис [{$id}] успішно видалено"];
+        } else {
+            return ['msg' => 'Помилка видалення запису'];
         }
     }
 }

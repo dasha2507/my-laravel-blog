@@ -8,6 +8,8 @@ use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use App\Models\BlogPost;
+use App\Http\Requests\BlogPostCreateRequest;
 
 class PostController extends Controller
 {
@@ -52,6 +54,24 @@ class PostController extends Controller
             ];
         } else {
             return ['message' => 'Помилка збереження'];
+        }
+    }
+    public function destroy($id)
+    {
+        $result = BlogPost::destroy($id);
+
+        //$result = BlogPost::find($id)->forceDelete();
+
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Статтю видалено'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Помилка видалення'
+            ];
         }
     }
 }

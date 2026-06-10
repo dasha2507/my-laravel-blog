@@ -1,0 +1,11 @@
+PUT http://127.0.0.1:8000/api/blog/posts/1
+Accept: application/json
+Content-Type: application/json
+
+{
+    "title": "Нова тестова стаття з PhpStorm",
+    "slug": "",
+    "category_id": 1,
+    "is_published": 1
+}
+
