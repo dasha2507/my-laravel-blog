@@ -17,9 +17,10 @@ use Illuminate\Support\Str;
 class PostController extends BaseController
 {
     private BlogPostRepository $blogPostRepository;
+
     public function __construct(BlogPostRepository $blogPostRepository)
     {
-        //parent::__construct();
+        // parent::__construct();
         $this->blogPostRepository = $blogPostRepository;
     }
 
@@ -49,16 +50,23 @@ class PostController extends BaseController
 
         if ($item) {
             BlogPostAfterCreateJob::dispatch($item);
-            return ['success' => true, 'message' => 'Успішно збережено'];
+            return response()->json(['success' => true, 'message' => 'Успішно збережено']);
         }
     }
 
     /**
-     * Display the specified resource.
+     * Вивід окремого посту (Наше поточне завдання)
      */
     public function show(string $id)
     {
-        $item = BlogPost::with(['category', 'user'])->findOrFail($id);
+        $item = $this->blogPostRepository->getEdit($id);
+
+        if (empty($item)) {
+            return response()->json(['message' => 'Запис не знайдено'], 404);
+        }
+
+        $item->load(['category', 'user']);
+
         return new PostResource($item);
     }
 
@@ -70,19 +78,19 @@ class PostController extends BaseController
         $item = $this->blogPostRepository->getEdit($id);
 
         if (empty($item)) {
-            return ['message' => "Запис id=[{$id}] не знайдено"];
+            return response()->json(['message' => "Запис id=[{$id}] не знайдено"], 404);
         }
 
         $data = $request->all();
         $result = $item->update($data);
 
         if ($result) {
-            return [
+            return response()->json([
                 'success' => true,
                 'message' => 'Успішно збережено'
-            ];
+            ]);
         } else {
-            return ['message' => 'Помилка збереження'];
+            return response()->json(['message' => 'Помилка збереження'], 500);
         }
     }
 
@@ -95,7 +103,7 @@ class PostController extends BaseController
 
         if ($result) {
             BlogPostAfterDeleteJob::dispatch($id)->delay(20);
-            return ['success' => true, 'message' => "Запис [{$id}] успішно видалено"];
+            return response()->json(['success' => true, 'message' => "Запис [{$id}] успішно видалено"]);
         }
     }
 }
