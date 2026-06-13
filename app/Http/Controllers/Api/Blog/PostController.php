@@ -3,47 +3,54 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Models\BlogPost;
-use App\Http\Resources\Api\Blog\PostResource;
-use App\Http\Resources\PostCollection;
+use App\Http\Resources\PostResource;
+use App\Repositories\BlogPostRepository;
 use App\Http\Requests\Api\Blog\PostCreateRequest;
 use App\Http\Requests\Api\Blog\PostUpdateRequest;
-use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
 use App\Jobs\BlogPostAfterCreateJob;
 use App\Jobs\BlogPostAfterDeleteJob;
-
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use DispatchesJobs;
 
 class PostController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    private BlogPostRepository $blogPostRepository;
+    public function __construct(BlogPostRepository $blogPostRepository)
     {
-        $items = BlogPost::with(['category', 'user'])->get();
+        //parent::__construct();
+        $this->blogPostRepository = $blogPostRepository;
+    }
 
-        return new PostCollection($items);
+    /**
+     * Отримання списку статей (для таблиці Nuxt)
+     */
+    public function index(Request $request)
+    {
+        $perPage = $request->input('perPage', 10);
+        $search = $request->input('search', null);
+        $sortBy = $request->input('sortBy', 'id');
+        $sortDir = $request->input('sortDir', 'desc');
+
+        $items = $this->blogPostRepository->getAllWithPaginate($perPage, $search, $sortBy, $sortDir);
+
+        return PostResource::collection($items);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\Illuminate\Http\Request $request)
+    public function store(Request $request)
     {
-        $data = $request->input(); // отримуємо масив даних, які надійшли з форми
+        $data = $request->input();
 
-        $item = (new BlogPost())->create($data); // створюємо об'єкт і додаємо в БД
+        $item = (new BlogPost())->create($data);
 
         if ($item) {
             BlogPostAfterCreateJob::dispatch($item);
-
             return ['success' => true, 'message' => 'Успішно збережено'];
         }
-
     }
 
     /**
@@ -52,7 +59,6 @@ class PostController extends BaseController
     public function show(string $id)
     {
         $item = BlogPost::with(['category', 'user'])->findOrFail($id);
-
         return new PostResource($item);
     }
 
@@ -62,13 +68,13 @@ class PostController extends BaseController
     public function update(BlogPostUpdateRequest $request, $id)
     {
         $item = $this->blogPostRepository->getEdit($id);
-        if (empty($item)) { //якщо ід не знайдено
+
+        if (empty($item)) {
             return ['message' => "Запис id=[{$id}] не знайдено"];
         }
 
-        $data = $request->all(); //отримаємо масив даних, які надійшли з форми
-
-        $result = $item->update($data); //оновлюємо дані об'єкта і зберігаємо в БД
+        $data = $request->all();
+        $result = $item->update($data);
 
         if ($result) {
             return [
@@ -85,15 +91,10 @@ class PostController extends BaseController
      */
     public function destroy($id)
     {
-        // Софт-деліт: запис міняє статус, але фізично залишається в БД
         $result = BlogPost::destroy($id);
-
-        // Альтернатива (якщо треба видалити назовсім):
-        // $result = BlogPost::find($id)->forceDelete();
 
         if ($result) {
             BlogPostAfterDeleteJob::dispatch($id)->delay(20);
-
             return ['success' => true, 'message' => "Запис [{$id}] успішно видалено"];
         }
     }

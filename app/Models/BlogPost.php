@@ -5,25 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
-const UNKNOWN_USER = 1;
+use App\Traits\FilterableTrait;
 
 class BlogPost extends Model
 {
-    use HasFactory, SoftDeletes;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes, FilterableTrait; 
+
     const UNKNOWN_USER = 1;
 
-    protected $fillable
-        = [
-            'title',
-            'slug',
-            'category_id',
-            'excerpt',
-            'content_raw',
-            'is_published',
-            'published_at',
-        ];
+    protected $fillable = [
+        'title',
+        'slug',
+        'category_id',
+        'excerpt',
+        'content_raw',
+        'is_published',
+        'published_at',
+    ];
 
     /**
      * Категорія статті

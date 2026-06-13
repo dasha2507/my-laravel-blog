@@ -15,9 +15,12 @@ class BlogPostRepository extends CoreRepository
     }
 
     /**
+     * Отримуємо статті з пагінацією, пошуком та сортуванням.
+     * Приймаємо параметри з контролера (з фронтенду).
+     *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getAllWithPaginate()
+    public function getAllWithPaginate(int $perPage = 25, ?string $search = null, ?string $sortBy = 'id', ?string $sortDir = 'desc')
     {
         $columns = [
             'id',
@@ -29,19 +32,18 @@ class BlogPostRepository extends CoreRepository
             'category_id',
         ];
 
-        $result = $this->startConditions()
+        $query = $this->startConditions()
             ->select($columns)
-            ->orderBy('id', 'DESC')
             ->with([
                 'category' => function ($query) {
                     $query->select(['id', 'title']);
                 },
-                //'category:id,title',
                 'user:id,name',
-            ])
-            ->paginate(25);
+            ]);
 
-        return $result;
+        $query->search('title', $search)->sort($sortBy, $sortDir);
+
+        return $query->paginate($perPage);
     }
 
     /**
