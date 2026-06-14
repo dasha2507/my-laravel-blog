@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Models\BlogPost;
-use App\Http\Resources\PostResource;
+use App\Http\Resources\Api\Blog\Admin\PostResource;
 use App\Repositories\BlogPostRepository;
 use App\Http\Requests\Api\Blog\PostCreateRequest;
 use App\Http\Requests\Api\Blog\PostUpdateRequest;

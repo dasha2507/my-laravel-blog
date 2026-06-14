@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Api\Blog\Admin;
+
 use App\Models\BlogCategory;
+use App\Http\Resources\Api\Blog\Admin\CategoryResource;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\Blog\Admin\CategoryCreateRequest;
 use App\Http\Requests\Api\Blog\Admin\CategoryUpdateRequest;
+
 class CategoryController extends BaseController
 {
     /**
@@ -13,9 +16,11 @@ class CategoryController extends BaseController
      */
     public function index()
     {
+        // Отримуємо пагіновані дані (по 5 записів на сторінку)
         $paginator = BlogCategory::paginate(5);
 
-        return $paginator;
+        // Обгортаємо пагінацію в API Ресурс
+        return CategoryResource::collection($paginator);
     }
 
     /**
