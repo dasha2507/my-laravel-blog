@@ -13,9 +13,12 @@ class CategoryUpdateRequest extends FormRequest
 
     public function rules(): array
     {
+        $categoryId = $this->route('category');
+
         return [
-            'title' => 'required|string|min:3|max:255',
-            'slug'  => 'nullable|string|max:255|unique:blog_categories,slug,' . $this->route('category'),
+            'title'     => 'required|string|min:3|max:255',
+            'slug'      => 'nullable|string|max:255|unique:blog_categories,slug,' . $categoryId,
+            'parent_id' => 'nullable|integer|exists:blog_categories,id',
         ];
     }
 }

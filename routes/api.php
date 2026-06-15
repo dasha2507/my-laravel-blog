@@ -15,9 +15,7 @@ Route::group(['prefix' => 'blog'], function () {
 });
 
 Route::group(['prefix' => 'admin/blog'], function () {
-    $methods = ['index', 'store', 'update'];
     Route::apiResource('categories', CategoryController::class)
-        ->only($methods)
         ->names('blog.admin.categories');
 });
 

@@ -15,10 +15,8 @@ class CategoryController extends BaseController
         $perPage = $request->input('per_page', 5);
         $search = $request->input('search');
 
-        // Створюємо базовий запит до моделі
         $query = BlogCategory::query();
 
-        // Якщо з Nuxt прийшов пошуковий запит, фільтруємо за назвою
         if (!empty($search)) {
             $query->where('title', 'like', '%' . $search . '%');
         }

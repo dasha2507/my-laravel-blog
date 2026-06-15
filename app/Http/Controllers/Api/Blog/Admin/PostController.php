@@ -44,21 +44,21 @@ class PostController extends Controller
     {
         $item = $this->blogPostRepository->getEdit($id);
 
-        if (empty($item)) { // якщо id не знайдено
+        if (empty($item)) {
             return ['message' => "Запис id=[{$id}] не знайдено"];
         }
 
-        $data = $request->all(); // отримаємо масив даних, які надійшли з форми
+        $data = $request->all();
 
-        if (empty($data['slug'])) { // якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); // генеруємо псевдонім
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['title']);
         }
 
-        if (empty($item->published_at) && $data['is_published']) { // якщо поле published_at порожнє і нам прийшло 1 в ключі is_published, то
-            $data['published_at'] = Carbon::now(); // генеруємо поточну дату
+        if (empty($item->published_at) && $data['is_published']) {
+            $data['published_at'] = Carbon::now();
         }
 
-        $result = $item->update($data); // оновлюємо дані об'єкта і зберігаємо в БД
+        $result = $item->update($data);
 
         if ($result) {
             return [

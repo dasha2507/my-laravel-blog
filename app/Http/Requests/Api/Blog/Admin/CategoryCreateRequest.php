@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Api\Blog\Admin;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryCreateRequest extends FormRequest
@@ -12,18 +11,18 @@ class CategoryCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'title'     => 'required|string|min:3|max:255',
+            'slug'      => 'nullable|string|max:255|unique:blog_categories,slug',
+            'parent_id' => 'nullable|integer|exists:blog_categories,id',
         ];
     }
 }
