@@ -8,9 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class CategoryResource extends JsonResource
 {
     /**
-     * Трансформація ресурсу в масив.
-     *
-     * @return array<string, mixed>
+     * Трансформація ресурсу в масив для передачі на фронтенд.
      */
     public function toArray(Request $request): array
     {
